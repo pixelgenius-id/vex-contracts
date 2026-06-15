@@ -38,3 +38,6 @@ build/*
 # Mainnet upgrade docs (local only)
 MAINNET_UPGRADE.md
 UPGRADE_RUNBOOK.md
+
+# CI workflows (upstream only)
+.github/
