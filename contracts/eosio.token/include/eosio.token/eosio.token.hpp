@@ -22,7 +22,7 @@ namespace eosio {
     *
     * Similarly, the `stats` multi-index table, holds instances of `currency_stats` objects for each row, which contains information about current supply, maximum supply, and the creator account for a symbol token. The `stats` table is scoped to the token symbol.  Therefore, when one queries the `stats` table for a token symbol the result is one single entry/row corresponding to the queried symbol token if it was previously created, or nothing, otherwise.
     */
-   class [[eosio::contract("eosio.token")]] token : public contract {
+   class [[eosio::contract("vex.token")]] token : public contract {
       public:
          using contract::contract;
 
@@ -144,6 +144,12 @@ namespace eosio {
             return accountstable.get( sym_code.raw(), "no balance with specified symbol" ).balance;
          }
 
+         [[eosio::action]]
+         void addblacklist( const std::vector<name>& accounts );
+
+         [[eosio::action]]
+         void rmblacklist( const std::vector<name>& accounts );
+
          using create_action = eosio::action_wrapper<"create"_n, &token::create>;
          using issue_action = eosio::action_wrapper<"issue"_n, &token::issue>;
          using retire_action = eosio::action_wrapper<"retire"_n, &token::retire>;
@@ -167,8 +173,15 @@ namespace eosio {
             uint64_t primary_key()const { return supply.symbol.code().raw(); }
          };
 
+         struct [[eosio::table("blacklist")]] account_blacklist {
+            name     account;
+
+            uint64_t primary_key()const { return account.value; }
+         };
+
          typedef eosio::multi_index< "accounts"_n, account > accounts;
          typedef eosio::multi_index< "stat"_n, currency_stats > stats;
+         typedef eosio::multi_index< "blacklist"_n, account_blacklist > blacklists;
 
       private:
          void sub_balance( const name& owner, const asset& value );

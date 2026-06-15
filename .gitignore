@@ -34,3 +34,7 @@
 build/*
 .DS_Store
 .vscode
+
+# Mainnet upgrade docs (local only)
+MAINNET_UPGRADE.md
+UPGRADE_RUNBOOK.md

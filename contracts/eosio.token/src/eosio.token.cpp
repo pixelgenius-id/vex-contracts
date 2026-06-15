@@ -100,6 +100,32 @@ void token::retire( const asset& quantity, const string& memo )
     sub_balance( st.issuer, quantity );
 }
 
+void token::addblacklist( const std::vector<name>& accounts )
+{
+    require_auth( get_self() );
+    blacklists bl_table( get_self(), get_self().value );
+    for( const auto& acc : accounts ) {
+        check( is_account( acc ), "account does not exist: " + acc.to_string() );
+        auto it = bl_table.find( acc.value );
+        if( it == bl_table.end() ) {
+            bl_table.emplace( get_self(), [&]( auto& row ) {
+                row.account = acc;
+            });
+        }
+    }
+}
+
+void token::rmblacklist( const std::vector<name>& accounts )
+{
+    require_auth( get_self() );
+    blacklists bl_table( get_self(), get_self().value );
+    for( const auto& acc : accounts ) {
+        auto it = bl_table.find( acc.value );
+        check( it != bl_table.end(), "account not in blacklist: " + acc.to_string() );
+        bl_table.erase( it );
+    }
+}
+
 void token::transfer( const name&    from,
                       const name&    to,
                       const asset&   quantity,
@@ -111,6 +137,10 @@ void token::transfer( const name&    from,
     auto sym = quantity.symbol.code();
     stats statstable( get_self(), sym.raw() );
     const auto& st = statstable.get( sym.raw() );
+
+    blacklists bl_table( get_self(), get_self().value );
+    check( bl_table.find( from.value ) == bl_table.end(), "account is blacklisted: " + from.to_string() );
+    check( bl_table.find( to.value ) == bl_table.end(), "account is blacklisted: " + to.to_string() );
 
     require_recipient( from );
     require_recipient( to );
