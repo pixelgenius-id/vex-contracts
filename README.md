@@ -32,7 +32,7 @@ This repo is a fork of [AntelopeIO/reference-contracts](https://github.com/Antel
 **Requirements**
 
 - [CDT](https://github.com/AntelopeIO/cdt) 4.1.1, installed at `/usr/opt/cdt/4.1.1/`
-- [Spring](https://github.com/AntelopeIO/spring) v1.2.2 (only needed for tests)
+- [Spring](https://github.com/pixelgenius-id/spring) v1.2.2 (only needed for tests)
 
 **Build contracts**
 
