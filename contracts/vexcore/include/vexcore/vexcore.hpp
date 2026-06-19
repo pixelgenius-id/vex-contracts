@@ -1326,7 +1326,7 @@ namespace eosiosystem {
           * @param quant - the quantity of tokens to buy ram with.
           */
          [[eosio::action]]
-         action_return_buyram buyram( const name& payer, const name& receiver, const asset& quant );
+         void buyram( const name& payer, const name& receiver, const asset& quant );
 
          /**
           * Buy a specific amount of ram bytes action. Increases receiver's ram in quantity of bytes provided.
@@ -1337,7 +1337,7 @@ namespace eosiosystem {
           * @param bytes - the quantity of ram to buy specified in bytes.
           */
          [[eosio::action]]
-         action_return_buyram buyrambytes( const name& payer, const name& receiver, uint32_t bytes );
+         void buyrambytes( const name& payer, const name& receiver, uint32_t bytes );
 
          /**
           * The buyramself action is designed to enhance the permission security by allowing an account to purchase RAM exclusively for itself.
@@ -1348,7 +1348,7 @@ namespace eosiosystem {
           * @param quant - the quantity of tokens to buy ram with.
           */
          [[eosio::action]]
-         action_return_buyram buyramself( const name& account, const asset& quant );
+         void buyramself( const name& account, const asset& quant );
 
          /**
           * Logging for buyram & buyrambytes action
@@ -1371,7 +1371,7 @@ namespace eosiosystem {
           * @param bytes - the amount of ram to sell in bytes.
           */
          [[eosio::action]]
-         action_return_sellram sellram( const name& account, int64_t bytes );
+         void sellram( const name& account, int64_t bytes );
 
          /**
           * Logging for sellram action
@@ -1394,7 +1394,7 @@ namespace eosiosystem {
           * @param memo - the memo string to accompany the transaction.
           */
          [[eosio::action]]
-         action_return_ramtransfer ramtransfer( const name& from, const name& to, int64_t bytes, const std::string& memo );
+         void ramtransfer( const name& from, const name& to, int64_t bytes, const std::string& memo );
 
          /**
           * Burn ram action, reduces owner's quota by bytes.
@@ -1404,7 +1404,7 @@ namespace eosiosystem {
           * @param memo - the memo string to accompany the transaction.
           */
          [[eosio::action]]
-         action_return_ramtransfer ramburn( const name& owner, int64_t bytes, const std::string& memo );
+         void ramburn( const name& owner, int64_t bytes, const std::string& memo );
 
          /**
           * Buy RAM and immediately burn RAM.
