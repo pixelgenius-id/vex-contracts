@@ -1,5 +1,5 @@
-#include <eosio.system/eosio.system.hpp>
-#include <eosio.token/eosio.token.hpp>
+#include <vexcore/vexcore.hpp>
+#include <vex.token/vex.token.hpp>
 
 namespace eosiosystem {
 

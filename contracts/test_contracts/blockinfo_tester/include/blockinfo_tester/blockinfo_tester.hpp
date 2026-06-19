@@ -10,7 +10,7 @@
 #include <eosio/time.hpp>
 #include <eosio/varint.hpp>
 
-#include <eosio.system/block_info.hpp>
+#include <vexcore/block_info.hpp>
 
 #endif
 

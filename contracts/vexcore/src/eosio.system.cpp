@@ -1,5 +1,5 @@
-#include <eosio.system/eosio.system.hpp>
-#include <eosio.token/eosio.token.hpp>
+#include <vexcore/vexcore.hpp>
+#include <vex.token/vex.token.hpp>
 
 #include <eosio/crypto.hpp>
 #include <eosio/dispatcher.hpp>
@@ -667,4 +667,4 @@ namespace eosiosystem {
       open_act.send( rex_account, core, get_self() );
    }
 
-} /// eosio.system
+} /// vexcore

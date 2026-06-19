@@ -1,7 +1,7 @@
 add_contract(
   vexcore
   vexcore
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/eosio.system.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/vexcore.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/delegate_bandwidth.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/finalizer_key.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/name_bidding.cpp
@@ -22,7 +22,7 @@ if(SYSTEM_BLOCKCHAIN_PARAMETERS)
 endif()
 
 target_include_directories(vexcore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-                                          ${CMAKE_CURRENT_SOURCE_DIR}/../eosio.token/include)
+                                          ${CMAKE_CURRENT_SOURCE_DIR}/../vex.token/include)
 
 set_target_properties(vexcore PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
@@ -35,8 +35,8 @@ target_include_directories(powup.results PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/incl
 set_target_properties(rex.results PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/.rex")
 set_target_properties(powup.results PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/.powerup")
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/ricardian/eosio.system.contracts.md.in
-               ${CMAKE_CURRENT_BINARY_DIR}/ricardian/eosio.system.contracts.md @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/ricardian/vexcore.contracts.md.in
+               ${CMAKE_CURRENT_BINARY_DIR}/ricardian/vexcore.contracts.md @ONLY)
 
 target_compile_options(vexcore PUBLIC -R${CMAKE_CURRENT_SOURCE_DIR}/ricardian
                                       -R${CMAKE_CURRENT_BINARY_DIR}/ricardian)

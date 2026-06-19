@@ -1,5 +1,5 @@
-#include <eosio.system/limit_auth_changes.hpp>
-#include <eosio.system/eosio.system.hpp>
+#include <vexcore/limit_auth_changes.hpp>
+#include <vexcore/vexcore.hpp>
 
 namespace eosiosystem {
 

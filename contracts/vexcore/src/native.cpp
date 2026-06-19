@@ -1,4 +1,4 @@
-#include <eosio.system/native.hpp>
+#include <vexcore/native.hpp>
 
 #include <eosio/check.hpp>
 

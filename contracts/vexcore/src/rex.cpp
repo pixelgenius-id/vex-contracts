@@ -1,6 +1,6 @@
-#include <eosio.system/eosio.system.hpp>
-#include <eosio.token/eosio.token.hpp>
-#include <eosio.system/rex.results.hpp>
+#include <vexcore/vexcore.hpp>
+#include <vex.token/vex.token.hpp>
+#include <vexcore/rex.results.hpp>
 
 namespace eosiosystem {
 

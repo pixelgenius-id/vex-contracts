@@ -1,5 +1,5 @@
-#include <eosio.system/block_info.hpp>
-#include <eosio.system/eosio.system.hpp>
+#include <vexcore/block_info.hpp>
+#include <vexcore/vexcore.hpp>
 
 namespace {
 

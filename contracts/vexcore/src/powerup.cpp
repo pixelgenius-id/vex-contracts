@@ -1,6 +1,6 @@
-#include <eosio.system/eosio.system.hpp>
+#include <vexcore/vexcore.hpp>
 #include <eosio/action.hpp>
-#include <eosio.system/powerup.results.hpp>
+#include <vexcore/powerup.results.hpp>
 #include <algorithm>
 #include <cmath>
 

@@ -1,4 +1,4 @@
-#include <eosio.system/exchange_state.hpp>
+#include <vexcore/exchange_state.hpp>
 
 #include <eosio/check.hpp>
 

@@ -1,4 +1,4 @@
-#include <eosio.system/eosio.system.hpp>
+#include <vexcore/vexcore.hpp>
 
 #include <eosio/eosio.hpp>
 

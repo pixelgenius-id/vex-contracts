@@ -1,0 +1,202 @@
+vexcore — Apa yang Berubah di Versi Baru
+=========================================
+Tanggal   : 15 Juni 2026
+WASM baru : ae739d581148e323c261b7a186e9ec94ed7945755353af1d8d1547e243fce6b4
+WASM lama : edd8404a72fe0654d0519bc4b849032084800a6b4e39760c0093e492d0f31a25
+ABI       : tidak berubah (fd3bebbdcb6567ad78df56b2fa2c08b4a6630f8b479d42956910a33844472e48)
+
+
+RINGKASAN
+---------
+Versi ini menambahkan 27 action baru dan 6 tabel baru. Semua 56 action
+lama tetap berjalan seperti biasa, tidak ada yang dihapus, tidak ada yang
+di-rename. ABI hash tidak berubah, jadi indexer dan explorer tidak perlu
+update apapun.
+
+Tiga hal yang paling terasa berbeda: fee RAM sekarang punya akun tujuan
+yang jelas (vex.fees), tabel global4 dirampingkan, dan chain sekarang
+punya pondasi untuk Savanna consensus.
+
+
+1. FITUR BARU
+-------------
+
+Finalizer Keys (persiapan Savanna)
+
+  Savanna adalah mekanisme konsensus generasi berikutnya dari Antelope.
+  Setiap BP bisa mendaftarkan BLS key mereka, mengaktifkannya, dan
+  menghapusnya. Ketika semua top-21 BP sudah punya key aktif, chain bisa
+  beralih ke Savanna.
+
+  Ada empat action untuk ini. BP mendaftarkan key pakai regfinkey, kalau
+  mau ganti key aktif pakai actfinkey, kalau mau bersih-bersih key lama
+  pakai delfinkey. Setelah semua siap, switchtosvnn dijalankan sekali
+  untuk mengaktifkan Savanna secara permanen.
+
+  Satu catatan: key yang didaftarkan wajib diawali "PUB_BLS". Ini juga
+  bagian dari bug fix yang ada di bagian 4.
+
+
+PowerUp
+
+  Cara baru dapat CPU/NET tanpa harus stake jangka panjang. User bayar
+  sejumlah VEX untuk dapat resource selama periode tertentu, misalnya
+  satu hari, lalu resource balik otomatis ke market setelah waktunya habis.
+
+  BP perlu konfigurasi market-nya dulu lewat cfgpowerup. Setelah itu user
+  bisa langsung pakai powerup kapan saja. Ada juga powerupexec untuk
+  membersihkan order yang sudah expired, siapapun bisa panggil ini.
+
+
+RAM Extended
+
+  Ada empat cara baru untuk kelola RAM. buyramself adalah shortcut buyram
+  untuk diri sendiri, jadi tidak perlu isi parameter receiver. buyramburn
+  mirip buyram biasa tapi fee-nya dibakar, bukan masuk ke vex.fees, cocok
+  untuk mekanisme deflationary. ramburn membakar RAM yang dimiliki secara
+  permanen sehingga supply total berkurang. ramtransfer memindahkan RAM ke
+  akun lain tanpa perlu jual-beli dulu.
+
+
+REX Extended
+
+  Ada empat tambahan untuk REX. setrexlimit dan setundlimit adalah action
+  khusus untuk mengubah limit harian withdraw REX dan undelegate, karena
+  sebelumnya tidak ada action dedicated untuk ini. setrexmature mengatur
+  berapa bucket maturity yang dipakai, minimal 1. donatetorex untuk
+  siapapun yang mau donasi VEX langsung ke pool REX tanpa dapat REX
+  token balik.
+
+  setrexlimit, setundlimit, dan setrexmature butuh persetujuan BP.
+  donatetorex bisa dipanggil siapapun.
+
+
+Inflation Schedule
+
+  Cara untuk menjadwalkan perubahan inflasi di waktu mendatang secara
+  otomatis, jadi tidak harus propose msig setiap kali mau ubah rate. BP
+  buat jadwal lewat setschedule, lalu execschedule menjalankannya kalau
+  sudah waktunya. Kalau jadwal mau dibatalkan sebelum dieksekusi, pakai
+  delschedule.
+
+  setschedule dan delschedule butuh persetujuan BP. execschedule bisa
+  dipanggil siapapun.
+
+
+Log dan Notifikasi
+
+  Empat action yang di-emit otomatis setiap kali ada transaction terkait:
+  logbuyram, logsellram, logramchange, dan logsystemfee. Ini bukan action
+  yang dipanggil user, melainkan notifikasi inline yang berguna untuk
+  indexer dan explorer yang mau track fee dan perubahan RAM market secara
+  real-time tanpa harus parsing tabel sendiri.
+
+
+Admin
+
+  Beberapa action untuk mengubah parameter global chain, dengan level
+  otorisasi yang berbeda-beda.
+
+  setinflation dan setpayfactor mengubah parameter inflasi. Keduanya butuh
+  persetujuan BP (vexcore@active, 15/21).
+
+  unvest melepas token yang sedang di-vesting. Juga butuh persetujuan BP.
+
+  migrate adalah action satu kali yang dijalankan saat upgrade untuk
+  memindahkan data dari format global4 lama ke vexlimits. Setelah upgrade
+  selesai action ini tidak relevan lagi. Butuh persetujuan BP.
+
+  regproducer2 adalah versi baru dari regproducer yang mendukung
+  producer_authority untuk Savanna. BP menjalankan ini sendiri, tidak
+  perlu msig.
+
+  limitauthchg membatasi permission mana yang boleh mengubah auth akun
+  tertentu. Dijalankan oleh akun itu sendiri.
+
+  voteupdate menghitung ulang vote weight satu voter kalau ada drift
+  karena perubahan stake atau REX. Siapapun bisa panggil ini.
+
+
+2. TABEL BARU
+-------------
+
+  Enam tabel baru ditambahkan untuk mendukung fitur-fitur di atas.
+
+  vexlimits menyimpan limit withdraw REX harian, limit undelegate harian,
+  dan tracker berapa yang sudah dipakai hari ini. Data ini sebelumnya ada
+  di global4 dan sekarang pindah ke sini.
+
+  finkeys dan finalizers menyimpan BLS finalizer key yang didaftarkan
+  setiap BP. finkeys menyimpan semua yang pernah didaftarkan, finalizers
+  mencatat mana yang sedang aktif.
+
+  lastpropfins adalah snapshot finalizer set terakhir yang di-propose ke
+  Savanna, dipakai untuk mendeteksi apakah ada perubahan yang perlu
+  di-broadcast.
+
+  powup.state dan powup.order untuk PowerUp market: state keseluruhan
+  market dan daftar order yang masih aktif.
+
+
+3. PERUBAHAN STRUKTUR
+---------------------
+
+global4
+
+  Tabel ini sebelumnya menyimpan dua hal sekaligus: parameter inflasi dan
+  limit harian REX/undelegate. Sekarang global4 hanya menyimpan parameter
+  inflasi, sementara limit harian pindah ke vexlimits.
+
+  Saat migrate dijalankan, data limit dari global4 lama dipindahkan ke
+  vexlimits sebelum global4 ditimpa format baru. Tidak ada data yang
+  hilang dalam proses ini.
+
+  Format lama (5 field, 72 byte):
+    daily_withdraw_limit, daily_undelegate_limit,
+    total_withdrawn_today, total_undelegated_today, last_reset_time
+
+  Format baru (3 field, 24 byte):
+    continuous_rate, inflation_pay_factor, votepay_factor
+
+vex.fees dan vex.reserv (akun baru)
+
+  Selama ini fee dari buyram, sellram, dan buyrambytes tidak punya akun
+  tujuan yang jelas. Sekarang semua masuk ke vex.fees. Akun ini wajib
+  dibuat sebelum WASM baru di-deploy karena kalau tidak ada, buyram dan
+  sellram langsung revert.
+
+  vex.reserv adalah reserve pool untuk PowerUp market dan wajib ada
+  sebelum cfgpowerup bisa dijalankan.
+
+  Kedua akun ini dibuat bersamaan lewat Proposal A sebelum upgrade kode.
+
+
+4. BUG FIX
+----------
+
+regfinkey — validasi format BLS key
+
+  Di versi lama ada celah: karena validasi BLS key dinonaktifkan sementara
+  menunggu protokol BLS_PRIMITIVES2 aktif di chain, tidak ada yang
+  mengecek apakah string yang didaftarkan benar-benar sebuah BLS public
+  key yang valid. Akibatnya string kosong pun bisa masuk ke tabel
+  finalizer keys tanpa error.
+
+  Fix-nya sederhana: pengecekan prefix "PUB_BLS" ditambahkan langsung
+  di awal regfinkey. Kalau string tidak diawali "PUB_BLS" maka transaction
+  langsung ditolak, terlepas dari apakah BLS_PRIMITIVES2 aktif atau tidak.
+
+  File: contracts/vexcore/src/finalizer_key.cpp, baris 193-194.
+
+
+5. YANG TIDAK BERUBAH
+---------------------
+
+  Semua 56 action lama tetap ada persis seperti dulu, tidak ada yang
+  dihapus, tidak ada yang di-rename, tidak ada perubahan behavior.
+
+  ABI hash tidak berubah, jadi semua tools, indexer, dan explorer yang
+  sudah berjalan tidak perlu update apapun.
+
+  Chain ID tetap sama. Semua wallet, dApp, dan integrasi eksternal tetap
+  terhubung normal.

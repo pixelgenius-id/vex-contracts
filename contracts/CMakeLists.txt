@@ -47,12 +47,12 @@ set(VOTING_ICON_URI "voting.png#db28cd3db6e62d4509af3644ce7d377329482a14bb4bfaca
 
 add_subdirectory(vexcore)
 
-# add_subdirectory(eosio.bios)
-# add_subdirectory(eosio.boot)
-# add_subdirectory(eosio.msig)
-# add_subdirectory(eosio.system)
-# add_subdirectory(eosio.token)
-# add_subdirectory(eosio.wrap)
-# add_subdirectory(eosio.fees)
-# add_subdirectory(eosio.bpay)
+add_subdirectory(vex.bios)
+add_subdirectory(vex.boot)
+add_subdirectory(vex.msig)
+# add_subdirectory(eosio.system) # replaced by vexcore
+add_subdirectory(vex.token)
+add_subdirectory(vex.wrap)
+add_subdirectory(vex.fees)
+add_subdirectory(vex.bpay)
 # add_subdirectory(test_contracts)

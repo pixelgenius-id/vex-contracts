@@ -1,4 +1,4 @@
-#include <eosio.system/powerup.results.hpp>
+#include <vexcore/powerup.results.hpp>
 
 void powup_results::powupresult( const asset& fee, const int64_t powup_net_weight, const int64_t powup_cpu_weight ) { }
 

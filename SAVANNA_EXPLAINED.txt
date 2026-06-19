@@ -1,0 +1,92 @@
+Savanna Consensus — Penjelasan Mudah
+=====================================
+
+
+APA ITU SAVANNA?
+----------------
+
+Sebelum Savanna, Vexanium punya masalah yang jarang dibicarakan: transaksi
+yang sudah masuk ke block belum tentu aman. Kamu harus tunggu sekitar 3
+menit, atau 325 block, sebelum sebuah transaksi benar-benar tidak bisa
+dibatalkan lagi. Dalam dunia blockchain kondisi ini disebut belum
+irreversible.
+
+Savanna mempersingkat waktu itu jadi kurang dari 2 detik.
+
+
+KENAPA DULU BISA 3 MENIT?
+--------------------------
+
+Di sistem lama, chain dianggap aman setelah 2/3 dari BP, minimal 15 dari
+21, sudah memproduksi block setelah block milikmu. Artinya kamu harus
+nunggu mereka semua kebagian giliran produksi dulu baru transaksimu
+dianggap final.
+
+Masalahnya giliran produksi itu satu per satu. Kalau ada BP yang lambat,
+koneksinya putus, atau memang tidak kooperatif, waktu tunggunya bisa
+molor lebih dari 3 menit.
+
+
+BAGAIMANA SAVANNA BEKERJA?
+--------------------------
+
+Savanna menambahkan lapisan konfirmasi baru di atas sistem produksi block
+yang sudah ada, namanya finality layer.
+
+Setiap BP mendaftarkan BLS key khusus, semacam tanda tangan kriptografi
+generasi baru. Setiap kali ada block baru, para BP menandatanganinya pakai
+BLS key mereka tanpa perlu menunggu giliran produksi. Begitu 15 dari 21
+sudah tanda tangan, block itu langsung final. Di jaringan normal prosesnya
+butuh 1-2 putaran komunikasi antar node, sekitar 1-2 detik.
+
+Sistem DPoS tetap berjalan seperti biasa. Savanna cuma menambahkan jalur
+konfirmasi yang lebih cepat di atasnya.
+
+
+KENAPA BLS KEY ISTIMEWA?
+-------------------------
+
+BLS punya kemampuan yang tidak dimiliki algoritma tanda tangan biasa:
+banyak tanda tangan bisa digabung jadi satu. Kalau 15 BP menandatangani
+block yang sama, hasilnya bukan 15 tanda tangan terpisah tapi satu tanda
+tangan tunggal yang bisa diverifikasi sekaligus. Ukurannya kecil,
+verifikasinya cepat, dan tidak membebani jaringan meski semua 21 BP tanda
+tangan bersamaan.
+
+
+KELEBIHAN SAVANNA
+-----------------
+
+Yang paling langsung terasa adalah kecepatan. Exchange, bridge, dan dApp
+yang selama ini harus nunggu 3 menit sebelum berani lanjut bisa sekarang
+bergerak setelah 2 detik.
+
+Selain itu Savanna menutup celah keamanan yang ada di sistem lama. Ada
+skenario, terutama serangan 51%, di mana block yang sudah cukup dalam pun
+masih bisa diganti dengan fork yang lebih panjang. Begitu block di-finalize
+lewat Savanna, tidak ada mekanisme apapun yang bisa membatalkannya.
+
+Satu hal lagi yang berguna untuk ekosistem: light client, bridge antar
+chain, dan wallet mobile tidak perlu download semua block untuk tahu apakah
+transaksi sudah final. Mereka cukup periksa satu BLS aggregate signature
+yang ukurannya kecil. Verifikasi dari luar chain jadi jauh lebih praktis.
+
+Soal BP yang tidak kooperatif: di sistem lama satu BP yang lambat bisa
+bikin seluruh antrian ikut nunggu. Savanna hanya butuh 15 dari 21, jadi
+kalau ada yang tidak merespons sistem tetap jalan normal.
+
+
+STATUS DI VEXANIUM
+------------------
+
+Savanna belum aktif di Vexanium. Vexcore versi baru sudah menyiapkan
+infrastrukturnya, BP sudah bisa mendaftarkan BLS key, mengaktifkannya,
+dan mengelolanya. Tapi chain belum beralih.
+
+Ada dua syarat sebelum switchtosvnn bisa dijalankan: protokol
+BLS_PRIMITIVES2 harus aktif di level chain, dan semua top-21 BP harus
+punya BLS key aktif. Setelah kedua syarat itu terpenuhi, switchtosvnn
+dieksekusi sekali dan Savanna aktif permanen.
+
+Tidak ada jalan balik setelah itu, makanya persiapannya dilakukan
+bertahap.
