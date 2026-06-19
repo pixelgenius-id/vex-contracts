@@ -123,7 +123,7 @@ void system_contract::cfgpowerup(powerup_config& args) {
    powerup_state_singleton state_sing{ get_self(), 0 };
    auto                   state = state_sing.get_or_default();
 
-   eosio::check(eosio::is_account(reserve_account), "eosio.reserv account must first be created"); // cspell:disable-line
+   eosio::check(eosio::is_account(reserve_account), "vex.reserv account must first be created"); // cspell:disable-line
 
    int64_t net_delta_available = 0;
    int64_t cpu_delta_available = 0;
