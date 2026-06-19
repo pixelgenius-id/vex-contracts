@@ -1900,7 +1900,7 @@ namespace eosiosystem {
          void transfer_from_fund( const name& owner, const asset& amount );
          void transfer_to_fund( const name& owner, const asset& amount );
          bool rex_loans_available()const;
-         static time_point_sec get_rex_maturity(const name& system_account_name = "eosio"_n );
+         static time_point_sec get_rex_maturity(const name& system_account_name = "vexcore"_n );
          asset add_to_rex_balance( const name& owner, const asset& payment, const asset& rex_received );
          asset add_to_rex_pool( const asset& payment );
          void add_to_rex_return_pool( const asset& fee );

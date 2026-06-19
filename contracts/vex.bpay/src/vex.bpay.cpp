@@ -21,16 +21,16 @@ void bpay::on_transfer( const name from, const name to, const asset quantity, co
     }
 
     // ignore eosio system incoming transfers (caused by bpay income transfers eosio => vex.bpay => producer)
-    if ( from == "eosio"_n) return;
+    if ( from == "vexcore"_n) return;
 
     symbol system_symbol = eosiosystem::system_contract::get_core_symbol();
 
     check( quantity.symbol == system_symbol, "only core token allowed" );
 
     rewards_table _rewards( get_self(), get_self().value );
-    eosiosystem::producers_table _producers( "eosio"_n, "eosio"_n.value );
+    eosiosystem::producers_table _producers( "vexcore"_n, "vexcore"_n.value );
 
-    eosiosystem::global_state_singleton _global("eosio"_n, "eosio"_n.value);
+    eosiosystem::global_state_singleton _global("vexcore"_n, "vexcore"_n.value);
     check( _global.exists(), "global state does not exist");
     uint16_t producer_count = _global.get().last_producer_schedule_size;
 
