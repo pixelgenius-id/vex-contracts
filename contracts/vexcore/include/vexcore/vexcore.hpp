@@ -1415,7 +1415,7 @@ namespace eosiosystem {
           * @param memo - the memo string to accompany the transaction.
           */
          [[eosio::action]]
-         action_return_buyram buyramburn( const name& payer, const asset& quantity, const std::string& memo );
+         void buyramburn( const name& payer, const asset& quantity, const std::string& memo );
 
          /**
           * Logging for ram changes

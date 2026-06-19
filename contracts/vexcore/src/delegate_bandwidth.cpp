@@ -187,16 +187,35 @@ namespace eosiosystem {
 
    /**
     * This action will buy and then burn the purchased RAM bytes.
+    * Uses RAM delta (before/after buyram) to compute bytes_purchased because
+    * buyram() is called as a plain C++ function and its multi_index cache is
+    * separate from ours — re-reading the same multi_index instance after buyram()
+    * returns stale cached data. A fresh instance forces a new db_find_i64 call.
     */
-   action_return_buyram system_contract::buyramburn( const name& payer, const asset& quantity, const std::string& memo ) {
+   void system_contract::buyramburn( const name& payer, const asset& quantity, const std::string& memo ) {
       require_auth( payer );
       check( quantity.symbol == core_symbol(), "quantity must be core token" );
       check( quantity.amount > 0, "quantity must be positive" );
 
-      const auto return_buyram = buyram( payer, payer, quantity );
-      ramburn( payer, return_buyram.bytes_purchased, memo );
+      int64_t bytes_before = 0;
+      {
+         user_resources_table userres( get_self(), payer.value );
+         auto res_itr = userres.find( payer.value );
+         bytes_before = (res_itr != userres.end()) ? res_itr->ram_bytes : 0;
+      }
 
-      return return_buyram;
+      buyram( payer, payer, quantity );
+
+      int64_t bytes_after = 0;
+      {
+         user_resources_table userres_fresh( get_self(), payer.value );
+         auto res_itr = userres_fresh.find( payer.value );
+         bytes_after = (res_itr != userres_fresh.end()) ? res_itr->ram_bytes : 0;
+      }
+      const int64_t bytes_purchased = bytes_after - bytes_before;
+
+      check( bytes_purchased > 0, "buyramburn: no ram purchased" );
+      ramburn( payer, bytes_purchased, memo );
    }
 
    [[eosio::action]]
