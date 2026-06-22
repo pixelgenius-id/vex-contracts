@@ -151,28 +151,21 @@ namespace eosiosystem {
          // return lhs.second < rhs.second; // sort by location
       } );
 
-      // Use legacy producer_key format for Spark503 compatibility (no set_proposed_producers_ex)
-      std::vector<eosio::producer_key> producers;
+      std::vector<eosio::producer_authority> producers;
+
       producers.reserve(top_producers.size());
-      for( auto& item : top_producers ) {
-         eosio::public_key legacy_key;
-         auto& auth = item.first.authority;
-         // block_signing_authority is variant<block_signing_authority_v0>
-         if (auth.index() == 0) {
-            auto& v0 = std::get<eosio::block_signing_authority_v0>(auth);
-            if (!v0.keys.empty()) {
-               legacy_key = v0.keys[0].key;
-            }
-         }
-         producers.push_back({ item.first.producer_name, legacy_key });
-      }
+      for( auto& item : top_producers )
+         producers.push_back( std::move(item.first) );
 
       if( set_proposed_producers( producers ) >= 0 ) {
          _gstate.last_producer_schedule_size = static_cast<decltype(_gstate.last_producer_schedule_size)>( producers.size() );
       }
 
-      // Savanna not yet active on Vexanium (Spark503)
-      // if( is_savanna ) { set_proposed_finalizers(...); }
+      // set_proposed_finalizers() checks if last proposed finalizer policy
+      // has not changed, it will not call set_finalizers() host function.
+      if( is_savanna ) {
+         set_proposed_finalizers( std::move(proposed_finalizers) );
+      }
    }
 
    double stake2vote( int64_t staked ) {

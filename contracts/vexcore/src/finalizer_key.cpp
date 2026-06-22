@@ -75,8 +75,7 @@ namespace eosiosystem {
          .finalizers = std::move(finalizer_authorities)
       };
 
-      // NOTE: set_finalizers is guarded — Savanna not yet active on Vexanium (Spark503)
-      // eosio::set_finalizers(std::move(fin_policy));
+      eosio::set_finalizers(std::move(fin_policy));
 
       // Store last proposed policy in both cache and DB table
       auto itr = _last_prop_finalizers.begin();
@@ -147,29 +146,43 @@ namespace eosiosystem {
       std::vector< finalizer_auth_info > proposed_finalizers;
       proposed_finalizers.reserve(_gstate.last_producer_schedule_size);
 
-      // Find a set of producers that meet all the normal requirements for
-      // being a proposer and also have an active finalizer key.
-      // The number of the producers must be equal to the number of producers
-      // in the last_producer_schedule.
       auto idx = _producers.get_index<"prototalvote"_n>();
       for( auto it = idx.cbegin(); it != idx.cend() && proposed_finalizers.size() < _gstate.last_producer_schedule_size && 0 < it->total_votes && it->active(); ++it ) {
          auto finalizer = _finalizers.find( it->owner.value );
          if( finalizer == _finalizers.end() ) {
-            // The producer is not in finalizers table, indicating it does not have an
-            // active registered finalizer key. Try next one.
             continue;
          }
 
-         // This should never happen. Double check the finalizer has an active key just in case
-         if( finalizer->active_key_binary.empty() ) {
-            continue;
+         // Look up key string from finkeys table to compute binary if not stored
+         std::vector<char> key_binary = finalizer->active_key_binary;
+         if( key_binary.empty() ) {
+            auto finkey = _finalizer_keys.find( finalizer->active_key_id );
+            if( finkey == _finalizer_keys.end() || finkey->finalizer_key.empty() ) {
+               continue;
+            }
+            auto g1 = to_binary( finkey->finalizer_key );
+            key_binary.assign( g1.begin(), g1.end() );
+            // Update stored binary so subsequent calls are faster
+            _finalizers.modify( finalizer, same_payer, [&]( auto& f ) {
+               f.active_key_binary = key_binary;
+            });
+            _finalizer_keys.modify( finkey, same_payer, [&]( auto& k ) {
+               k.finalizer_key_binary = key_binary;
+            });
          }
 
-         proposed_finalizers.emplace_back(*finalizer);
+         finalizer_auth_info auth;
+         auth.key_id = finalizer->active_key_id;
+         auth.fin_authority.description = finalizer->finalizer_name.to_string();
+         auth.fin_authority.weight = 1;
+         auth.fin_authority.public_key = key_binary;
+         proposed_finalizers.emplace_back(std::move(auth));
       }
 
-      check( proposed_finalizers.size() == _gstate.last_producer_schedule_size,
-            "not enough top producers have registered finalizer keys, has " + std::to_string(proposed_finalizers.size()) + ", require " + std::to_string(_gstate.last_producer_schedule_size) );
+      // Require at least 2/3+1 (BFT threshold) of schedule size
+      uint32_t required = (_gstate.last_producer_schedule_size * 2) / 3 + 1;
+      check( proposed_finalizers.size() >= required,
+            "not enough top producers have registered finalizer keys, has " + std::to_string(proposed_finalizers.size()) + ", require at least " + std::to_string(required) );
 
       set_proposed_finalizers(std::move(proposed_finalizers));
       check( is_savanna_consensus(), "switching to Savanna failed" );
@@ -189,25 +202,27 @@ namespace eosiosystem {
       auto producer = _producers.find( finalizer_name.value );
       check( producer != _producers.end(), "finalizer " + finalizer_name.to_string() + " is not a registered producer");
 
-      // Basic key and signature format checks
-      check(finalizer_key.compare(0, 7, "PUB_BLS") == 0, "finalizer key does not start with PUB_BLS: " + finalizer_key);
+      // Basic signature format check
       check(proof_of_possession.compare(0, 7, "SIG_BLS") == 0, "proof of possession signature does not start with SIG_BLS: " + proof_of_possession);
 
-      // NOTE: BLS validation disabled — Savanna/BLS_PRIMITIVES2 not active on Spark503
-      // binary field not needed; byfinkey indexes by key string directly
-      std::vector<char> fin_key_binary;
+      // Convert to binary form. The validity will be checked during conversion.
+      const auto fin_key_g1 = to_binary(finalizer_key);
+      const auto pop_g2 = eosio::decode_bls_signature_to_g2(proof_of_possession);
 
-      // Duplication check across all registered keys (by string comparison)
+      // Duplication check — byfinkey index is SHA256 of key string (by_fin_key())
       const auto idx = _finalizer_keys.get_index<"byfinkey"_n>();
-      const auto dup_itr = idx.find( get_finalizer_key_hash(finalizer_key) );
-      check( dup_itr == idx.end(), "finalizer key was already registered: " + finalizer_key );
+      const auto hash = get_finalizer_key_hash(finalizer_key);
+      check(idx.find(hash) == idx.end(), "duplicate finalizer key: " + finalizer_key);
+
+      // Proof of possession check
+      check(eosio::bls_pop_verify(fin_key_g1, pop_g2), "proof of possession check failed");
 
       // Insert the finalizer key into finalyzer_keys table
       const auto finalizer_key_itr = _finalizer_keys.emplace( finalizer_name, [&]( auto& k ) {
          k.id                   = get_next_finalizer_key_id();
          k.finalizer_name       = finalizer_name;
          k.finalizer_key        = finalizer_key;
-         k.finalizer_key_binary = fin_key_binary;
+         k.finalizer_key_binary = { fin_key_g1.begin(), fin_key_g1.end() };
       });
 
       // Update finalizers table
